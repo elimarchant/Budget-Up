@@ -1,0 +1,20 @@
+{
+  "name": "budget-up",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Budget Up - a shared household budgeting PWA (ILS) on Cloudflare Workers + D1",
+  "scripts": {
+    "dev": "wrangler dev",
+    "db:local": "wrangler d1 migrations apply budget-up --local",
+    "db:remote": "wrangler d1 migrations apply budget-up --remote",
+    "deploy": "wrangler deploy",
+    "icons": "node scripts/make-icons.mjs",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "devDependencies": {
+    "sharp": "^0.34.0",
+    "wrangler": "^4.0.0"
+  }
+}
+

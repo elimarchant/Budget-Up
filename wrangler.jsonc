@@ -1,0 +1,25 @@
+{
+  "name": "budget-up",
+  "main": "src/worker.js",
+  "compatibility_date": "2025-09-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "budget-up",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // 05:00 UTC on the 1st = 07:00/08:00 in Israel: add default items + email last month's summary.
+  "triggers": { "crons": ["0 5 1 * *"] },
+  "vars": {
+    "MAIL_FROM": "Budget Up <onboarding@resend.dev>"
+  }
+}
