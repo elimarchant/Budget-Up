@@ -318,7 +318,10 @@ async function viewAccount(el) {
       <div class="muted small" style="margin-bottom:12px">Signed in as <b>@${u.username}</b></div>
       <label class="field"><span>Your name</span><input type="text" name="display_name" dir="auto" maxlength="40" value="${u.display_name}"></label>
       <label class="field"><span>Email (for your monthly summary)</span><input type="email" name="email" autocomplete="email" value="${u.email}" placeholder="you@example.com"></label>
-      <label class="toggle"><span>Email me a summary on the 1st of every month</span><input type="checkbox" name="email_summary" ${u.email_summary ? 'checked' : ''}></label>
+      <label class="toggle"><span>Email me a monthly summary of last month</span><input type="checkbox" name="email_summary" ${u.email_summary ? 'checked' : ''}></label>
+      <label class="field"><span>Send it on day of the month</span><select name="email_day">
+        ${Array.from({ length: 31 }, (_, i) => i + 1).map((d) => html`<option value="${d}" ${d === u.email_day ? 'selected' : ''}>${d === 1 ? '1 (the 1st — default)' : d}</option>`)}</select>
+        <span class="muted small" style="margin-top:6px;font-weight:500">If a month is shorter (say you pick 31 and it has 30 days), it's sent on the month's last day.</span></label>
       <button class="btn primary block" type="submit">Save</button></form>
     <button class="btn block" id="sample" style="margin-top:10px">Send me last month’s summary now</button>
     <div class="section-title">Change password</div>
@@ -330,7 +333,7 @@ async function viewAccount(el) {
   f.onsubmit = (e) => {
     e.preventDefault();
     withBusy(f.querySelector('[type=submit]'), async () => {
-      S.user = (await patch('/api/me', { display_name: f.display_name.value, email: f.email.value, email_summary: f.email_summary.checked })).user;
+      S.user = (await patch('/api/me', { display_name: f.display_name.value, email: f.email.value, email_summary: f.email_summary.checked, email_day: f.email_day.value })).user;
       toast('Saved'); rerender();
     }, f.querySelector('.form-error'));
   };

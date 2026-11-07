@@ -42,6 +42,7 @@ A user can belong to **several completely separate budgets**, for example *"Eli'
 - **Inviting someone**: Settings → Sharing & budgets → *Invite someone* creates a link (valid 14 days) that can be copied or shared with the phone's share sheet.
   - Opening the link **without an account** → the person creates one, and is added to the budget.
   - Opening it **with an account** → they confirm and get access to that budget.
+- There is no view-only role: everyone invited gets **full access** (by design).
 - Everyone in a budget can see, add, edit and delete entries and categories. The **owner** (creator) can additionally rename or delete the budget and remove people. Members can leave.
 - Invite links can be revoked. Each entry records **who added it**.
 - Non-members cannot see or fetch a budget's data at all.
@@ -119,11 +120,11 @@ Settings → **Make default expenses**.
 - **Categories** — add or rename categories, add subcategories under a main category, **turn a main category into a subcategory** (move it under another), promote a subcategory to a main category, and remove categories. Removing archives a category: it disappears from pickers but past entries keep it in reports.
 - **Make default expenses** — see §10.
 - **Sharing & budgets** — members, invite links, rename / switch / create / leave / delete budgets.
-- **Account** — name, email, monthly-email toggle, *send me last month's summary now*, change password.
+- **Account** — name, email, monthly-email toggle and **day of month**, *send me last month's summary now*, change password.
 
 ## 12. Monthly summary email
 
-On the **1st of every month** (≈ 07:00–08:00 Israel time) each user with an email address receives:
+Each user with an email address receives the summary of the **previous calendar month** once a month, at ≈ 07:00–08:00 Israel time. **By default this is the 1st.** In Settings → Account each user can choose a different **day of the month (1–31)**. If a month is shorter than the chosen day (e.g. 31 in a 30-day month), it is sent on that month's **last day**. The email looks like:
 
 > **Hi Eli, here is your budget summary from March 2026:**
 > Income · Expenses · Balance, then **Expenses by category** — each main category with its total and its **subcategories** underneath — and the maaser status.
@@ -131,7 +132,8 @@ On the **1st of every month** (≈ 07:00–08:00 Israel time) each user with an 
 
 - It contains **categories and subcategories only — never the list of individual purchases.**
 - If the user belongs to several budgets, each gets its own section in the one email. Budgets with no activity that month are skipped.
-- Users can turn it off in Settings → Account. Each user receives each month's summary at most once.
+- Users can turn it off, or change the day, in Settings → Account. Each user receives each month's summary at most once.
+- Delivery uses **Gmail SMTP** (an app password stored as a Worker secret, so no domain is needed); Resend is supported as an alternative.
 
 ## 13. Hebrew + English
 

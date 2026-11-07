@@ -4,7 +4,7 @@ import {
   str, amountToAgorot, dateStr, monthStr, oneOf, validEmail, todayIL,
 } from './lib.js';
 import { sendUserSummary, maaserFor } from './email.js';
-import { addMonths } from '../public/js/aggregate.js';
+import { addMonths, isSummaryDay } from '../public/js/aggregate.js';
 
 const COOKIE = 'bu_session';
 const SESSION_DAYS = 365;
@@ -45,7 +45,7 @@ async function authUser(req, env) {
   const token = getCookie(req, COOKIE);
   if (!token) return null;
   const row = await first(env,
-    `SELECT u.id,u.username,u.display_name,u.email,u.email_summary,s.expires_at
+    `SELECT u.id,u.username,u.display_name,u.email,u.email_summary,u.email_day,s.expires_at
        FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=?`, await sha256Hex(token));
   if (!row || row.expires_at < nowIso()) return null;
   return { ...row, _token: token };
@@ -53,6 +53,7 @@ async function authUser(req, env) {
 
 const publicUser = (u) => ({
   id: u.id, username: u.username, display_name: u.display_name, email: u.email || '', email_summary: !!u.email_summary,
+  email_day: u.email_day || 1,
 });
 
 async function requireMember(env, ledgerId, userId) {
@@ -194,7 +195,12 @@ route('PATCH', '/api/me', async (c) => {
   const name = b.display_name !== undefined ? str(b.display_name, { min: 1, max: 40, field: 'Name' }) : c.user.display_name;
   const email = b.email !== undefined ? (b.email ? validEmail(b.email) : '') : (c.user.email || '');
   const summary = b.email_summary !== undefined ? (b.email_summary ? 1 : 0) : c.user.email_summary;
-  await run(c.env, 'UPDATE users SET display_name=?, email=?, email_summary=? WHERE id=?', name, email || null, summary, c.user.id);
+  let day = c.user.email_day || 1;
+  if (b.email_day !== undefined) {
+    day = Number(b.email_day);
+    if (!Number.isInteger(day) || day < 1 || day > 31) throw new HttpError(400, 'Pick a day between 1 and 31');
+  }
+  await run(c.env, 'UPDATE users SET display_name=?, email=?, email_summary=?, email_day=? WHERE id=?', name, email || null, summary, day, c.user.id);
   const u = await first(c.env, 'SELECT * FROM users WHERE id=?', c.user.id);
   return json({ user: publicUser(u) });
 });
@@ -534,6 +540,7 @@ async function monthly(env) {
   for (const l of await all(env, 'SELECT id FROM ledgers')) await ensureDefaults(env, l.id, thisMonth);
   const users = await all(env, "SELECT * FROM users WHERE email IS NOT NULL AND email<>'' AND email_summary=1");
   for (const u of users) {
+    if (!isSummaryDay(u.email_day || 1, today)) continue; // each user picks their own day (default: the 1st)
     try {
       const r = await sendUserSummary(env, u, prev, today);
       console.log('summary', u.username, prev, r.reason || (r.ok ? 'sent' : 'failed'));

@@ -1,6 +1,7 @@
 // Monthly summary email: per ledger, main categories with their subcategories (never individual purchases).
 import { buildTree, fmtAmount, monthLabel, computeMaaser, sumBy } from '../public/js/aggregate.js';
 import { nowIso } from './lib.js';
+import { WorkerMailer } from 'worker-mailer';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = (a) => `<span dir="ltr" style="unicode-bidi:isolate">₪${fmtAmount(a)}</span>`;
@@ -86,9 +87,22 @@ export function buildEmail({ name, month, sections }) {
   return { subject: `Your Budget Up summary for ${label}`, html, text: text.join('\n') };
 }
 
+/** Sends via Gmail SMTP (app password) if configured, else Resend, else skips. */
 export async function sendMail(env, { to, subject, html, text }) {
+  if (env.GMAIL_USER && env.GMAIL_APP_PASSWORD) {
+    try {
+      await WorkerMailer.send(
+        { host: 'smtp.gmail.com', port: 465, secure: true, authType: 'plain',
+          credentials: { username: env.GMAIL_USER, password: env.GMAIL_APP_PASSWORD } },
+        { from: { name: 'Budget Up', email: env.GMAIL_USER }, to, subject, text, html });
+      return { ok: true };
+    } catch (e) {
+      console.log('Gmail SMTP failed', e && e.message || e);
+      return { ok: false };
+    }
+  }
   if (!env.RESEND_API_KEY) {
-    console.log('RESEND_API_KEY not set - skipping email to', to);
+    console.log('No email provider configured - skipping email to', to);
     return { ok: false, skipped: true };
   }
   const res = await fetch('https://api.resend.com/emails', {

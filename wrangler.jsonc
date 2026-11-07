@@ -2,6 +2,7 @@
   "name": "budget-up",
   "main": "src/worker.js",
   "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "assets": {
     "directory": "./public",
@@ -17,8 +18,9 @@
       "migrations_dir": "migrations"
     }
   ],
-  // 05:00 UTC on the 1st = 07:00/08:00 in Israel: add default items + email last month's summary.
-  "triggers": { "crons": ["0 5 1 * *"] },
+  // Daily at 05:00 UTC (07:00/08:00 Israel): add default items on the 1st, and email the previous
+  // month's summary to each user on their chosen day of the month (default: the 1st).
+  "triggers": { "crons": ["0 5 * * *"] },
   "vars": {
     "MAIL_FROM": "Budget Up <onboarding@resend.dev>"
   }

@@ -105,6 +105,9 @@ assert.equal(m.maaser.left, -90000); log('extra giving goes negative (remembered
 
 // account
 assert.equal((await eli.call('PATCH', '/api/me', { email: 'nope' }, { raw: true })).status, 400); log('bad email rejected');
+assert.equal((await eli.call('GET', '/api/me')).user.email_day, 1); log('email day defaults to the 1st');
+assert.equal((await eli.call('PATCH', '/api/me', { email_day: 31 })).user.email_day, 31); log('email day can be changed');
+assert.equal((await eli.call('PATCH', '/api/me', { email_day: 32 }, { raw: true })).status, 400); log('invalid email day rejected');
 await eli.call('POST', '/api/me/password', { current: 'password123', next: 'newpassword456' });
 await new Client().call('POST', '/api/login', { username: 'eli_' + sfx, password: 'newpassword456' }); log('password change');
 await eli.call('POST', '/api/logout', {});

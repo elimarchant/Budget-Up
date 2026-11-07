@@ -31,8 +31,8 @@ Full details are in [`budget-spec.md`](budget-spec.md).
 | App | Vanilla JS ES modules, no build step (`public/`) — PWA with manifest + service worker |
 | API | Cloudflare Worker (`src/worker.js`) |
 | Database | Cloudflare D1 (SQLite), migrations in `migrations/` |
-| Monthly job | Worker cron trigger (`0 5 1 * *`) — adds default items and emails summaries |
-| Email | [Resend](https://resend.com) HTTP API (optional until configured) |
+| Monthly job | Daily Worker cron (`0 5 * * *`) — adds default items on the 1st and emails each user on their chosen day |
+| Email | Gmail SMTP via `worker-mailer` (Resend also supported) — optional until configured |
 
 Shared logic (category roll-ups, maaser maths, formatting) lives in `public/js/aggregate.js` and is used by both the app and the Worker, with unit tests in `test/`.
 
@@ -57,13 +57,17 @@ npm run deploy
 
 ### Monthly summary emails
 
-Emails are sent through Resend. Without a key the app works normally and simply skips sending.
+Emails go out through **Gmail SMTP** (no domain needed). Without it the app works normally and just skips sending.
+
+1. In your Google account turn on 2-Step Verification, then create an **App password** (Google Account → Security → App passwords).
+2. Store both as Worker secrets:
 
 ```bash
-npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put GMAIL_USER           # your full Gmail address
+npx wrangler secret put GMAIL_APP_PASSWORD   # the 16-character app password
 ```
 
-Set `MAIL_FROM` in `wrangler.jsonc` to a sender on a domain you have verified in Resend. Until you verify a domain, Resend only delivers to the email on your own Resend account. **Settings → Account → "Send me last month's summary now"** sends a test.
+**Settings → Account → "Send me last month's summary now"** sends a test. Each user picks their send day there (default: the 1st; short months use their last day). [Resend](https://resend.com) is also supported via `RESEND_API_KEY` if you have a verified domain.
 
 ## Regenerate the icons
 

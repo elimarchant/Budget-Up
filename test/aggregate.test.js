@@ -1,12 +1,23 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addMonths, buildTree, computeMaaser, fmtAmount, monthSpan } from '../public/js/aggregate.js';
+import { addMonths, buildTree, computeMaaser, fmtAmount, monthSpan, isSummaryDay } from '../public/js/aggregate.js';
 
 test('addMonths crosses year boundaries', () => {
   assert.equal(addMonths('2026-01', -1), '2025-12');
   assert.equal(addMonths('2026-11', 2), '2027-01');
   assert.equal(addMonths('2026-11', -11), '2025-12');
   assert.equal(monthSpan('2025-12', '2026-11'), 12);
+});
+
+test('isSummaryDay: chosen day, clamped to the last day of short months', () => {
+  assert.ok(isSummaryDay(1, '2026-03-01'));
+  assert.ok(!isSummaryDay(1, '2026-03-02'));
+  assert.ok(isSummaryDay(31, '2026-03-31'));
+  assert.ok(isSummaryDay(31, '2026-04-30'));   // April has 30 days
+  assert.ok(!isSummaryDay(31, '2026-04-29'));
+  assert.ok(isSummaryDay(31, '2026-02-28'));   // non-leap February
+  assert.ok(isSummaryDay(30, '2028-02-29'));   // leap February
+  assert.ok(!isSummaryDay(30, '2028-03-29'));
 });
 
 test('fmtAmount', () => {

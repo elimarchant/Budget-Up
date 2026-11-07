@@ -110,6 +110,16 @@ export function computeMaaser({ incomes, gives, today, ledgerMonth }) {
   };
 }
 
+/**
+ * Should the monthly email go out today? `emailDay` (1-31) is the user's chosen day; in months with
+ * fewer days it is sent on the month's last day. `today` is 'YYYY-MM-DD'.
+ */
+export function isSummaryDay(emailDay, today) {
+  const [y, m, d] = today.split('-').map(Number);
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return d === Math.min(emailDay, last);
+}
+
 /** Format agorot -> '1,234.50' (drops .00). */
 export function fmtAmount(agorot) {
   const neg = agorot < 0;
