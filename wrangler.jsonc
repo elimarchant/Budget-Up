@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "budget-up",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "2e0bc26e-31c7-41e5-bcb4-6e7f7d6047e0",
       "migrations_dir": "migrations"
     }
   ],

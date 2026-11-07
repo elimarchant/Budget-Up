@@ -1,4 +1,4 @@
-**🌐 Live app: _deploying — the link will appear here shortly_**
+**🌐 Live app: [https://budget-up.budget-up.workers.dev](https://budget-up.budget-up.workers.dev)**
 
 <p align="center"><img src="public/icons/icon-512.png" width="120" alt="Budget Up duck icon"></p>
 
